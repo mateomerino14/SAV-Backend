@@ -1,0 +1,14 @@
+# Global owners
+* @SAV-Backend-team
+
+# Frontend specific
+/src/frontend/ @frontend-team
+
+# Backend specific  
+/src/api/ @backend-team
+/src/model/ @backend-team
+
+# Configuration files
+/.github/ @devops-team
+/docker* @devops-team
+/Makefile @devops-team

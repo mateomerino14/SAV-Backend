@@ -1,0 +1,66 @@
+// This is your Prisma schema file for User model
+// This would be part of the schema.prisma file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // or mysql, sqlite
+  url      = env("DATABASE_URL")
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  DEACTIVATED
+}
+
+model User {
+  id                    Int           @id @default(autoincrement())
+  firstName             String?       @map("first_name") @db.VarChar(50)
+  lastName              String?       @map("last_name") @db.VarChar(50)
+  middleName            String?       @map("middle_name") @db.VarChar(50)
+  gender                Gender?       @map("gender")
+  phoneNumber           String?       @unique @map("phone_number") @db.VarChar(15)
+  emailAddress          String        @unique @map("email") @db.VarChar(50)
+  password              String?       @map("password")
+  verified              Boolean       @default(false) @map("verified")
+  requirePasswordChange Boolean       @default(false) @map("require_password_change")
+  twoFactorSecret       String?       @map("two_factor_secret")
+  isTwoFactorEnabled    Boolean       @default(false) @map("is_two_factor_enabled")
+  status                AccountStatus @default(ACTIVE) @map("status")
+  
+  createdAt             DateTime      @default(now()) @map("created_at")
+  updatedAt             DateTime      @updatedAt @map("updated_at")
+  deletedAt             DateTime?     @map("deleted_at")
+
+  @@map("users")
+  @@index([phoneNumber], name: "users_phone_number_index")
+  @@index([emailAddress], name: "users_email_index")
+}
+
+// TypeScript types (would be generated automatically by Prisma)
+// export type User = {
+//   id: number;
+//   firstName: string | null;
+//   lastName: string | null;
+//   middleName: string | null;
+//   gender: Gender | null;
+//   phoneNumber: string | null;
+//   emailAddress: string;
+//   password: string | null;
+//   verified: boolean;
+//   requirePasswordChange: boolean;
+//   twoFactorSecret: string | null;
+//   isTwoFactorEnabled: boolean;
+//   status: AccountStatus;
+//   createdAt: Date;
+//   updatedAt: Date;
+//   deletedAt: Date | null;
+// };

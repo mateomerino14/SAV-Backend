@@ -1,0 +1,38 @@
+{
+  "name": "SAV-Backend",
+  "version": "1.0.0",
+  "description": "SAV-Backend - A Node.js application",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "lint": "eslint . --ext .js,.ts",
+    "test": "jest",
+    "lint:check": "eslint . --ext .js,.ts",
+    "lint:fix": "eslint . --ext .js,.ts --fix",
+    "format:check": "prettier --check .",
+    "format:fix": "prettier --write .",
+    "test:cov": "jest --coverage"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^7.4.2",
+    "bcryptjs": "^3.0.3",
+    "cors": "^2.8.6",
+    "dotenv": "^17.3.1",
+    "express": "^5.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.3",
+    "winston": "^3.19.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "fs-extra": "^11.3.4",
+    "jest": "^30.2.0",
+    "nodemon": "^3.1.14",
+    "prisma": "^7.4.2",
+    "supertest": "^7.2.2"
+  }
+}
