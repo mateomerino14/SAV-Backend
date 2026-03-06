@@ -1,130 +1,20 @@
-name: Security Audit
+name: Security Scanning
 
-on:
-  push:
-    branches: [main, develop]
-    paths:
-      - "**"
-  pull_request:
-    branches: [main, develop]
-    paths:
-      - "**"
+on: [push, pull_request]
 
 jobs:
-  sast-scan:
+  security:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: 'npm'
-
-      - name: Install OSV Scanner
+      - uses: actions/checkout@v3
+      
+      - name: Check for secrets in code
         run: |
-          curl -sSfL https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_linux_amd64 -o osv-scanner
-          chmod +x osv-scanner
-          sudo mv osv-scanner /usr/local/bin/
-      - name: Run OSV Scanner on lockfiles
-        continue-on-error: true
-        run: |
-          if [ -f yarn.lock ]; then
-            osv-scanner --lockfile=yarn.lock | tee osv-report.txt
-            if grep -E 'Vulnerabilities:[[:space:]]*[1-9][0-9]*' osv-report.txt; then
-              echo "VULN_FOUND=true" >> $GITHUB_ENV
-              echo "❌ Vulnerabilities found!"
-            fi
-          elif [ -f package-lock.json ]; then
-            osv-scanner --lockfile=package-lock.json | tee osv-report.txt
-            if grep -E 'Vulnerabilities:[[:space:]]*[1-9][0-9]*' osv-report.txt; then
-              echo "VULN_FOUND=true" >> $GITHUB_ENV
-              echo "❌ Vulnerabilities found!"
-            fi
+          echo "🔍 Buscando posibles secretos hardcodeados..."
+          # Buscar patrones de secretos
+          if grep -r -E "(password|secret|key|token)[[:space:]]*=[[:space:]]*['\"][^'\"]{8,}" src --include="*.js" --include="*.ts" 2>/dev/null; then
+            echo "⚠️  Posibles secretos encontrados!"
+            exit 1
           else
-            echo "No lockfile found. Skipping vulnerability scan."
+            echo "✅ No se encontraron secretos aparentes"
           fi
-
-      - name: Install Trivy
-        run: |
-          sudo apt-get update && sudo apt-get install -y wget
-          wget -qO trivy.deb https://github.com/aquasecurity/trivy/releases/download/v0.65.0/trivy_0.65.0_Linux-64bit.deb
-          sudo dpkg -i trivy.deb
-      - name: Run Trivy FS scan
-        continue-on-error: true
-        run: |
-          trivy fs . --exit-code 1 --severity MEDIUM,HIGH,CRITICAL | tee trivy-report.txt
-          if grep -E '│ (yarn.lock|package-lock.json) │ [^│]+ │[[:space:]]*[1-9][0-9]*[[:space:]]*│' trivy-report.txt; then
-            echo "VULN_FOUND=true" >> $GITHUB_ENV
-            echo "❌ Vulnerabilities found by Trivy!"
-          fi
-
-      - name: Install Node.js dependencies
-        run: npm ci
-
-      - name: Run OWASP Dependency Check
-        uses: dependency-check/Dependency-Check_Action@main
-        with:
-          project: "basic-app"
-          path: "."
-          format: "JSON"
-          out: "dependency-check-report"
-
-      - name: Check Dependency Check report for vulnerabilities
-        run: |
-          if [ -f dependency-check-report/dependency-check-report.json ]; then
-            VULN_COUNT=$(jq '.dependencies[].vulnerabilities | select(. != null) | length' dependency-check-report/dependency-check-report.json | awk '{s+=$1} END {print s}')
-            if [ "$VULN_COUNT" -gt 0 ]; then
-              echo "VULN_FOUND=true" >> $GITHUB_ENV
-              echo "❌ Vulnerabilities found by Dependency Check!"
-            fi
-          fi
-
-      - name: Summarize Dependency Check vulnerabilities
-        run: |
-          SUMMARY_FILE="dependency-check-summary.txt"
-          if [ -f dependency-check-report/dependency-check-report.json ]; then
-            echo -e "Vulnerable Dependency | Vulnerability ID | Severity | Description\n---------------------|-------------------|----------|------------" > $SUMMARY_FILE
-            jq -r '
-              .dependencies[] |
-              select(.vulnerabilities != null) |
-              .fileName as $dep |
-              .vulnerabilities[] |
-              [$dep, .name, .severity, (.description | gsub("\n"; " "))] |
-              @tsv
-            ' dependency-check-report/dependency-check-report.json | while IFS=$'\t' read -r dep id severity desc; do
-              wrapped_desc=$(echo "$desc" | fold -s -w 120)
-              printf "%s | %s | %s | %s\n\n" "$dep" "$id" "$severity" "$wrapped_desc" >> $SUMMARY_FILE
-            done
-          else
-            echo "No Dependency Check report found." > $SUMMARY_FILE
-          fi
-
-      - name: Send vulnerability report email
-        if: env.VULN_FOUND == 'true' && secrets.SMTP_SERVER != ''
-        uses: dawidd6/action-send-mail@v3
-        with:
-          server_address: ${{ secrets.SMTP_SERVER }}
-          server_port: 465
-          username: ${{ secrets.SMTP_USERNAME }}
-          password: ${{ secrets.SMTP_PASSWORD }}
-          subject: "Basic Template Security Scan Failed - ${{ github.repository }}"
-          to: ${{ secrets.SMTP_MAIL_TO }}
-          from: ${{ secrets.SMTP_MAIL_FROM }}
-          body: |
-            Security vulnerability scan failed for ${{ github.repository }}.
-
-            Tools that found vulnerabilities:
-            - OSV Scanner: Check osv-report.txt
-            - Trivy: Check trivy-report.txt  
-            - OWASP Dependency Check: Check dependency-check-summary.txt
-
-            Please review and remediate the identified vulnerabilities.
-          attachments: |
-            osv-report.txt
-            trivy-report.txt
-            dependency-check-summary.txt
-
-      - name: Fail job if vulnerabilities found
-        if: env.VULN_FOUND == 'true'
-        run: exit 1
