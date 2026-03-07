@@ -11,13 +11,12 @@ beforeAll(() => {
 // Global test teardown
 afterAll(() => {
   // Cleanup test resources
-  
+
   try {
     execSync('rm -f test.db');
   } catch (error) {
     // Ignore cleanup errors
   }
-  
 });
 
 // Jest global configuration

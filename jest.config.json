@@ -1,13 +1,7 @@
 {
   "testEnvironment": "node",
-  "roots": [
-    "<rootDir>/src",
-    "<rootDir>/tests"
-  ],
-  "testMatch": [
-    "**/__tests__/**/*.(js|ts)",
-    "**/*.(test|spec).(js|ts)"
-  ],
+  "roots": ["<rootDir>/src", "<rootDir>/tests"],
+  "testMatch": ["**/__tests__/**/*.(js|ts)", "**/*.(test|spec).(js|ts)"],
   "collectCoverageFrom": [
     "src/**/*.(js|ts)",
     "!src/**/*.d.ts",
@@ -15,11 +9,7 @@
     "!src/index.(js|ts)"
   ],
   "coverageDirectory": "coverage",
-  "coverageReporters": [
-    "text",
-    "lcov",
-    "html"
-  ],
+  "coverageReporters": ["text", "lcov", "html"],
   "coverageThreshold": {
     "global": {
       "branches": 80,

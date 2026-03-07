@@ -12,21 +12,21 @@ const users = [];
 router.post('/register', validate(userSchemas.register), async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     // Check if user exists
-    const existingUser = users.find(u => u.email === email);
+    const existingUser = users.find((u) => u.email === email);
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
 
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 10);
-    
+
     // Create user
-    const user = { 
-      id: users.length + 1, 
-      email, 
-      password: hashedPassword 
+    const user = {
+      id: users.length + 1,
+      email,
+      password: hashedPassword,
     };
     users.push(user);
 
@@ -37,10 +37,10 @@ router.post('/register', validate(userSchemas.register), async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
-    res.status(201).json({ 
+    res.status(201).json({
       message: 'User created successfully',
       token,
-      user: { id: user.id, email: user.email }
+      user: { id: user.id, email: user.email },
     });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });
@@ -51,9 +51,9 @@ router.post('/register', validate(userSchemas.register), async (req, res) => {
 router.post('/login', validate(userSchemas.login), async (req, res) => {
   try {
     const { email, password } = req.body;
-    
+
     // Find user
-    const user = users.find(u => u.email === email);
+    const user = users.find((u) => u.email === email);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }
@@ -71,10 +71,10 @@ router.post('/login', validate(userSchemas.login), async (req, res) => {
       { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
     );
 
-    res.json({ 
+    res.json({
       message: 'Login successful',
       token,
-      user: { id: user.id, email: user.email }
+      user: { id: user.id, email: user.email },
     });
   } catch (error) {
     res.status(500).json({ error: 'Server error' });

@@ -1,7 +1,9 @@
 ## Description
+
 Brief description of the changes
 
 ## Type of Change
+
 - [ ] Bug fix
 - [ ] New feature
 - [ ] Breaking change
@@ -10,11 +12,13 @@ Brief description of the changes
 - [ ] Performance improvement
 
 ## Testing
+
 - [ ] Tests pass locally
 - [ ] New tests added for new functionality
 - [ ] Manual testing completed
 
 ## Checklist
+
 - [ ] Code follows naming conventions
 - [ ] Self-review completed
 - [ ] Documentation updated

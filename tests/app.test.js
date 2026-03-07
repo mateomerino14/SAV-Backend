@@ -4,9 +4,7 @@ const app = require('../src/index');
 describe('API Tests', () => {
   describe('GET /', () => {
     it('should return welcome message', async () => {
-      const response = await request(app)
-        .get('/')
-        .expect(200);
+      const response = await request(app).get('/').expect(200);
 
       expect(response.body).toHaveProperty('message');
       expect(response.body.message).toContain('Welcome');
@@ -16,23 +14,20 @@ describe('API Tests', () => {
 
   describe('Health Check', () => {
     it('should return health status', async () => {
-      const response = await request(app)
-        .get('/health')
-        .expect(200);
+      const response = await request(app).get('/health').expect(200);
 
       expect(response.body).toHaveProperty('status');
       expect(response.body.status).toBe('OK');
     });
   });
 
-  
   describe('Authentication', () => {
     describe('POST /api/auth/register', () => {
       it('should register a new user', async () => {
         const userData = {
           email: 'test@example.com',
           password: 'password123',
-          confirmPassword: 'password123'
+          confirmPassword: 'password123',
         };
 
         const response = await request(app)
@@ -49,7 +44,7 @@ describe('API Tests', () => {
         const userData = {
           email: 'invalid-email',
           password: 'password123',
-          confirmPassword: 'password123'
+          confirmPassword: 'password123',
         };
 
         await request(app)
@@ -58,12 +53,11 @@ describe('API Tests', () => {
           .expect(400);
       });
 
-      
       it('should not register user with short password', async () => {
         const userData = {
           email: 'test2@example.com',
           password: '123',
-          confirmPassword: '123'
+          confirmPassword: '123',
         };
 
         await request(app)
@@ -76,7 +70,7 @@ describe('API Tests', () => {
         const userData = {
           email: 'test3@example.com',
           password: 'password123',
-          confirmPassword: 'differentpassword'
+          confirmPassword: 'differentpassword',
         };
 
         await request(app)
@@ -84,7 +78,6 @@ describe('API Tests', () => {
           .send(userData)
           .expect(400);
       });
-      
     });
 
     describe('POST /api/auth/login', () => {
@@ -93,19 +86,17 @@ describe('API Tests', () => {
         const userData = {
           email: 'login@example.com',
           password: 'password123',
-          confirmPassword: 'password123'
+          confirmPassword: 'password123',
         };
 
-        await request(app)
-          .post('/api/auth/register')
-          .send(userData);
+        await request(app).post('/api/auth/register').send(userData);
 
         // Then login
         const response = await request(app)
           .post('/api/auth/login')
           .send({
             email: userData.email,
-            password: userData.password
+            password: userData.password,
           })
           .expect(200);
 
@@ -118,22 +109,20 @@ describe('API Tests', () => {
           .post('/api/auth/login')
           .send({
             email: 'nonexistent@example.com',
-            password: 'wrongpassword'
+            password: 'wrongpassword',
           })
           .expect(401);
       });
 
-      
       it('should not login with invalid email format', async () => {
         await request(app)
           .post('/api/auth/login')
           .send({
             email: 'invalid-email',
-            password: 'password123'
+            password: 'password123',
           })
           .expect(400);
       });
-      
     });
 
     describe('Protected Routes', () => {
@@ -144,19 +133,15 @@ describe('API Tests', () => {
         const userData = {
           email: 'protected@example.com',
           password: 'password123',
-          confirmPassword: 'password123'
+          confirmPassword: 'password123',
         };
 
-        await request(app)
-          .post('/api/auth/register')
-          .send(userData);
+        await request(app).post('/api/auth/register').send(userData);
 
-        const loginResponse = await request(app)
-          .post('/api/auth/login')
-          .send({
-            email: userData.email,
-            password: userData.password
-          });
+        const loginResponse = await request(app).post('/api/auth/login').send({
+          email: userData.email,
+          password: userData.password,
+        });
 
         authToken = loginResponse.body.token;
       });
@@ -169,9 +154,7 @@ describe('API Tests', () => {
       });
 
       it('should not access protected route without token', async () => {
-        await request(app)
-          .get('/api/users/profile')
-          .expect(401);
+        await request(app).get('/api/users/profile').expect(401);
       });
 
       it('should not access protected route with invalid token', async () => {
@@ -182,14 +165,12 @@ describe('API Tests', () => {
       });
     });
   });
-  
 
-  
   describe('Validation Tests', () => {
     it('should validate request body schema', async () => {
       const invalidData = {
         email: 'not-an-email',
-        password: '123' // too short
+        password: '123', // too short
       };
 
       const response = await request(app)
@@ -209,13 +190,10 @@ describe('API Tests', () => {
       expect(response.body).toHaveProperty('error');
     });
   });
-  
 
   describe('Error Handling', () => {
     it('should handle 404 for non-existent routes', async () => {
-      await request(app)
-        .get('/api/non-existent-route')
-        .expect(404);
+      await request(app).get('/api/non-existent-route').expect(404);
     });
 
     it('should handle malformed JSON', async () => {
@@ -229,24 +207,19 @@ describe('API Tests', () => {
     });
   });
 
-  
   describe('Database Tests', () => {
     it('should connect to database', async () => {
       // Test database connection
-      const response = await request(app)
-        .get('/api/health/db')
-        .expect(200);
+      const response = await request(app).get('/api/health/db').expect(200);
 
       expect(response.body).toHaveProperty('database');
       expect(response.body.database).toBe('connected');
     });
   });
-  
 });
 
 // Unit tests for utility functions
 describe('Utility Functions', () => {
-  
   describe('Logger', () => {
     const { logger } = require('../src/utils/logger');
 
@@ -258,9 +231,7 @@ describe('Utility Functions', () => {
       expect(() => logger.error('Test error message')).not.toThrow();
     });
   });
-  
 
-  
   describe('Validation Utils', () => {
     const { userSchemas } = require('../src/utils/validation');
 
@@ -268,7 +239,7 @@ describe('Utility Functions', () => {
       const validData = {
         email: 'test@example.com',
         password: 'password123',
-        confirmPassword: 'password123'
+        confirmPassword: 'password123',
       };
 
       const { error } = userSchemas.register.validate(validData);
@@ -279,12 +250,11 @@ describe('Utility Functions', () => {
       const invalidData = {
         email: 'invalid-email',
         password: 'password123',
-        confirmPassword: 'password123'
+        confirmPassword: 'password123',
       };
 
       const { error } = userSchemas.register.validate(invalidData);
       expect(error).toBeDefined();
     });
   });
-  
 });
