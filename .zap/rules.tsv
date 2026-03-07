@@ -1,0 +1,33 @@
+# .zap/rules.tsv
+# OWASP ZAP Rules Configuration for Basic Template
+# Format: RULE_ID    ACTION    DESCRIPTION
+
+# Common false positives to ignore
+10011    IGNORE    Cookie Without Secure Flag
+10015    IGNORE    Incomplete or No Cache-control and Pragma HTTP Header Set
+10021    IGNORE    X-Content-Type-Options Header Missing
+10020    IGNORE    X-Frame-Options Header Not Set
+10016    IGNORE    Web Browser XSS Protection Not Enabled
+10017    IGNORE    Cross-Domain JavaScript Source File Inclusion
+10035    IGNORE    Strict-Transport-Security Header Not Set
+10063    IGNORE    Permissions Policy Header Not Set
+
+# Development environment specific ignores
+10098    IGNORE    Cross-Domain Misconfiguration
+10055    IGNORE    CSP Scanner: Wildcard Directive
+10038    IGNORE    Content Security Policy (CSP) Header Not Set
+
+# API-specific rules
+10024    WARN      Information Disclosure - Sensitive Information in URL
+10025    WARN      Information Disclosure - Sensitive Information in HTTP Referrer Header
+10027    WARN      Information Disclosure - Suspicious Comments
+
+# Security rules to enforce (FAIL)
+90020    FAIL      Remote Code Execution - CVE-2012-1823
+90019    FAIL      Code Injection
+40018    FAIL      SQL Injection
+40019    FAIL      SQL Injection - MySQL
+40020    FAIL      SQL Injection - Hypersonic SQL
+40021    FAIL      SQL Injection - Oracle
+40022    FAIL      SQL Injection - PostgreSQL
+90018    FAIL      Remote Code Execution - CVE-2014-6271
